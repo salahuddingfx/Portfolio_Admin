@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import DashboardShell from '@/components/DashboardShell';
 import ImageUpload from '@/components/ImageUpload';
 import api from '@/lib/api';
-import { Plus, Pencil, Trash2, ExternalLink, Github, Loader2, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, ExternalLink, Loader2, X } from 'lucide-react';
 
 interface Project {
   _id: string;
