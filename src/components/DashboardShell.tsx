@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Briefcase, MessageSquare, LogOut, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Briefcase, MessageSquare, LogOut, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -25,6 +25,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Projects', href: '/projects', icon: Briefcase },
     { name: 'Reviews', href: '/reviews', icon: MessageSquare },
+    { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];
 
   const handleLogout = () => {
