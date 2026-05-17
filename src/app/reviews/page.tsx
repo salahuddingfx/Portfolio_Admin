@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import DashboardShell from '@/components/DashboardShell';
 import ImageUpload from '@/components/ImageUpload';
 import api from '@/lib/api';
-import { Plus, Pencil, Trash2, Loader2, X, Star } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, X, Star, Link as LinkIcon, Copy } from 'lucide-react';
 
 interface Review {
   _id: string;
@@ -23,6 +23,12 @@ export default function ReviewsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteLink, setInviteLink] = useState('');
+  const [inviteLabel, setInviteLabel] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteExpires, setInviteExpires] = useState(7);
+  const [inviteMessage, setInviteMessage] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -105,6 +111,35 @@ export default function ReviewsPage() {
     }
   };
 
+  const handleCreateInvite = async () => {
+    setInviteLoading(true);
+    setInviteMessage('');
+    try {
+      const res = await api.post('/admin/reviews/invite', {
+        label: inviteLabel,
+        email: inviteEmail,
+        expiresInDays: inviteExpires
+      });
+      setInviteLink(res.data?.shareUrl || '');
+      setInviteMessage('Review link generated.');
+    } catch (err) {
+      console.error('Invite failed:', err);
+      setInviteMessage('Unable to generate invite.');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const handleCopyInvite = async () => {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setInviteMessage('Link copied to clipboard.');
+    } catch {
+      setInviteMessage('Copy failed.');
+    }
+  };
+
   return (
     <DashboardShell>
       <div className="space-y-12">
@@ -120,6 +155,73 @@ export default function ReviewsPage() {
             <Plus size={20} />
             Add Review
           </button>
+        </div>
+
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[2.5rem] p-8 md:p-10 space-y-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-[var(--accent)]/10 text-[var(--accent)] rounded-xl">
+              <LinkIcon size={22} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold uppercase tracking-tight">Client Review Link</h2>
+              <p className="text-sm text-[var(--muted)]">Generate a private link and send it to your client.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Client Name (optional)</label>
+              <input
+                type="text"
+                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 text-xs focus:border-[var(--accent)] outline-none transition-all"
+                value={inviteLabel}
+                onChange={(e) => setInviteLabel(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Client Email (optional)</label>
+              <input
+                type="email"
+                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 text-xs focus:border-[var(--accent)] outline-none transition-all"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Expires (days)</label>
+              <input
+                type="number"
+                min={1}
+                max={30}
+                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 text-xs focus:border-[var(--accent)] outline-none transition-all"
+                value={inviteExpires}
+                onChange={(e) => setInviteExpires(Number(e.target.value))}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center gap-3">
+            <button
+              onClick={handleCreateInvite}
+              disabled={inviteLoading}
+              className="inline-flex items-center gap-2 px-6 py-4 rounded-2xl bg-white text-black font-black uppercase tracking-tighter hover:bg-[var(--accent)] transition-all disabled:opacity-60"
+            >
+              {inviteLoading ? 'Generating...' : 'Generate Link'}
+            </button>
+            <div className="flex-1 flex items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--background)] px-4 py-3 text-xs text-[var(--muted)]">
+              <span className="truncate">{inviteLink || 'Link will appear here after generation.'}</span>
+              <button
+                onClick={handleCopyInvite}
+                className="ml-auto flex items-center gap-1 text-[var(--accent)] hover:text-white transition"
+                disabled={!inviteLink}
+              >
+                <Copy size={14} />
+                Copy
+              </button>
+            </div>
+          </div>
+
+          {inviteMessage && <p className="text-xs text-[var(--muted)]">{inviteMessage}</p>}
         </div>
 
         {loading ? (
