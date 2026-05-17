@@ -18,6 +18,7 @@ interface Project {
   title: string;
   desc: string;
   image: string;
+  category: string;
   tags: string[];
   links: {
     live: string;
@@ -37,6 +38,7 @@ export default function ProjectsPage() {
     title: '',
     desc: '',
     image: '',
+    category: '',
     tags: '',
     liveLink: '',
     sourceLink: '',
@@ -65,6 +67,7 @@ export default function ProjectsPage() {
         title: project.title,
         desc: project.desc,
         image: project.image,
+        category: project.category || '',
         tags: project.tags.join(', '),
         liveLink: project.links.live,
         sourceLink: project.links.source,
@@ -76,6 +79,7 @@ export default function ProjectsPage() {
         title: '',
         desc: '',
         image: '',
+        category: '',
         tags: '',
         liveLink: '',
         sourceLink: '',
@@ -93,6 +97,7 @@ export default function ProjectsPage() {
       title: formData.title,
       desc: formData.desc,
       image: formData.image,
+      category: formData.category,
       tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
       links: {
         live: formData.liveLink,
@@ -168,6 +173,11 @@ export default function ProjectsPage() {
                 <div className="p-8 space-y-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        {project.category && (
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-black bg-[var(--accent)] px-3 py-1 rounded-full">{project.category}</span>
+                        )}
+                      </div>
                       <h3 className="text-2xl font-black tracking-tight uppercase leading-tight">{project.title}</h3>
                       <div className="flex flex-wrap gap-2">
                         {project.tags.map(tag => (
@@ -215,6 +225,17 @@ export default function ProjectsPage() {
                     <ImageUpload onUpload={(url) => setFormData({ ...formData, image: url })} defaultValue={formData.image} />
                   </div>
                   
+                  <div className="space-y-2">
+                    <label className="text-xs font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Category</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Full Stack, AI/ML"
+                      className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-5 text-sm focus:border-[var(--accent)] outline-none transition-all"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    />
+                  </div>
+
                   <div className="space-y-2">
                     <label className="text-xs font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Project Order</label>
                     <input

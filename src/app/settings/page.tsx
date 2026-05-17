@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardShell from '@/components/DashboardShell';
 import api from '@/lib/api';
-import { Save, Loader2, User, Phone, Mail, MapPin, MessageCircle, FileText } from 'lucide-react';
+import { Save, Loader2, User, Phone, Mail, MapPin, MessageCircle, FileText, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -207,12 +207,38 @@ export default function SettingsPage() {
                 <label className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] ml-1 flex items-center gap-2">
                   <FileText size={12} /> CV / Resume URL
                 </label>
-                <input
-                  type="text"
-                  className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-5 text-sm focus:border-[var(--accent)] outline-none transition-all"
-                  value={settings.cvUrl}
-                  onChange={(e) => setSettings({ ...settings, cvUrl: e.target.value })}
-                />
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    className="flex-1 bg-[var(--background)] border border-[var(--border)] rounded-2xl p-5 text-sm focus:border-[var(--accent)] outline-none transition-all"
+                    value={settings.cvUrl}
+                    onChange={(e) => setSettings({ ...settings, cvUrl: e.target.value })}
+                  />
+                  <label className="flex items-center gap-2 px-6 py-5 bg-white/5 border border-[var(--border)] rounded-2xl text-xs font-mono uppercase tracking-widest text-[var(--muted)] hover:text-white hover:border-[var(--accent)]/50 cursor-pointer transition-all whitespace-nowrap">
+                    <Upload size={14} /> Upload PDF
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const fd = new FormData();
+                        fd.append('image', file);
+                        try {
+                          const res = await api.post('/admin/upload', fd, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                          });
+                          setSettings({ ...settings, cvUrl: res.data.url });
+                          toast.success('CV uploaded!');
+                        } catch {
+                          toast.error('Upload failed.');
+                        }
+                        e.target.value = '';
+                      }}
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           </div>
