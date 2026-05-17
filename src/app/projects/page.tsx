@@ -25,6 +25,7 @@ interface Project {
     source: string;
   };
   order: number;
+  featured: boolean;
 }
 
 export default function ProjectsPage() {
@@ -42,7 +43,8 @@ export default function ProjectsPage() {
     tags: '',
     liveLink: '',
     sourceLink: '',
-    order: 0
+    order: 0,
+    featured: false
   });
 
   const fetchProjects = async () => {
@@ -71,7 +73,8 @@ export default function ProjectsPage() {
         tags: project.tags.join(', '),
         liveLink: project.links.live,
         sourceLink: project.links.source,
-        order: project.order
+        order: project.order,
+        featured: project.featured || false
       });
     } else {
       setEditingProject(null);
@@ -83,7 +86,8 @@ export default function ProjectsPage() {
         tags: '',
         liveLink: '',
         sourceLink: '',
-        order: projects.length
+        order: projects.length,
+        featured: false
       });
     }
     setModalOpen(true);
@@ -103,7 +107,8 @@ export default function ProjectsPage() {
         live: formData.liveLink,
         source: formData.sourceLink
       },
-      order: formData.order
+      order: formData.order,
+      featured: formData.featured
     };
 
     try {
@@ -177,6 +182,9 @@ export default function ProjectsPage() {
                         {project.category && (
                           <span className="text-[10px] font-mono uppercase tracking-widest text-black bg-[var(--accent)] px-3 py-1 rounded-full">{project.category}</span>
                         )}
+                        {project.featured && (
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-white bg-purple-600 px-3 py-1 rounded-full border border-purple-400/50 shadow-[0_0_15px_rgba(168,85,247,0.4)] animate-pulse">Featured</span>
+                        )}
                       </div>
                       <h3 className="text-2xl font-black tracking-tight uppercase leading-tight">{project.title}</h3>
                       <div className="flex flex-wrap gap-2">
@@ -245,6 +253,26 @@ export default function ProjectsPage() {
                       value={formData.order}
                       onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
                     />
+                  </div>
+
+                  <div className="flex items-center justify-between p-5 bg-[var(--background)] border border-[var(--border)] rounded-2xl">
+                    <div className="space-y-1">
+                      <span className="text-xs font-mono uppercase tracking-widest text-white block">Featured Project</span>
+                      <span className="text-[10px] font-mono text-[var(--muted)] block">Showcase this project on the homepage</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, featured: !formData.featured })}
+                      className={`w-14 h-8 rounded-full transition-all duration-300 p-1 flex items-center ${
+                        formData.featured ? 'bg-[var(--accent)]' : 'bg-neutral-800 border border-[var(--border)]'
+                      }`}
+                    >
+                      <div
+                        className={`w-6 h-6 rounded-full bg-white transition-transform duration-300 ${
+                          formData.featured ? 'translate-x-6' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
                   </div>
                 </div>
 
