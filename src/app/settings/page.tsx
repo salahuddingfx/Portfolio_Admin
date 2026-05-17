@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import DashboardShell from '@/components/DashboardShell';
 import api from '@/lib/api';
 import { Save, Loader2, User, Phone, Mail, MapPin, MessageCircle, FileText } from 'lucide-react';
+import { toast } from 'sonner';
 
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -66,7 +67,26 @@ export default function SettingsPage() {
   const fetchSettings = async () => {
     try {
       const res = await api.get('/admin/settings');
-      setSettings(res.data);
+      const data = res.data;
+      setSettings({
+        bio: data.bio || '',
+        aboutTitle: data.aboutTitle || '',
+        aboutText: data.aboutText || '',
+        experienceYears: data.experienceYears || '',
+        projectsCompleted: data.projectsCompleted || '',
+        cvUrl: data.cvUrl || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        whatsapp: data.whatsapp || '',
+        location: data.location || '',
+        socials: {
+          github: data.socials?.github || '',
+          linkedin: data.socials?.linkedin || '',
+          twitter: data.socials?.twitter || '',
+          instagram: data.socials?.instagram || '',
+          facebook: data.socials?.facebook || '',
+        }
+      });
     } catch (err) {
       console.error('Failed to fetch settings:', err);
     } finally {
@@ -83,10 +103,10 @@ export default function SettingsPage() {
     setSubmitting(true);
     try {
       await api.put('/admin/settings', settings);
-      alert('Settings updated successfully!');
+      toast.success('Settings updated successfully!');
     } catch (err) {
       console.error('Save failed:', err);
-      alert('Failed to save settings.');
+      toast.error('Failed to save settings.');
     } finally {
       setSubmitting(false);
     }
