@@ -18,6 +18,7 @@ interface Project {
   title: string;
   desc: string;
   image: string;
+  category?: string;
   tags: string[];
   links: {
     live: string;
@@ -37,6 +38,7 @@ export default function ProjectsPage() {
     title: '',
     desc: '',
     image: '',
+    category: 'Other',
     tags: '',
     liveLink: '',
     sourceLink: '',
@@ -65,6 +67,7 @@ export default function ProjectsPage() {
         title: project.title,
         desc: project.desc,
         image: project.image,
+        category: project.category || 'Other',
         tags: project.tags.join(', '),
         liveLink: project.links.live,
         sourceLink: project.links.source,
@@ -76,6 +79,7 @@ export default function ProjectsPage() {
         title: '',
         desc: '',
         image: '',
+        category: 'Other',
         tags: '',
         liveLink: '',
         sourceLink: '',
@@ -93,6 +97,7 @@ export default function ProjectsPage() {
       title: formData.title,
       desc: formData.desc,
       image: formData.image,
+      category: formData.category,
       tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
       links: {
         live: formData.liveLink,
@@ -248,6 +253,17 @@ export default function ProjectsPage() {
                       className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-5 text-sm focus:border-[var(--accent)] outline-none transition-all"
                       value={formData.tags}
                       onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Category</label>
+                    <input
+                      type="text"
+                      placeholder="Full Stack / PWA / Frontend / Backend"
+                      className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-5 text-sm focus:border-[var(--accent)] outline-none transition-all"
+                      value={formData.category}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     />
                   </div>
 
