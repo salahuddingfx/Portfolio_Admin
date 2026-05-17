@@ -33,6 +33,14 @@ export default function ReviewsPage() {
 
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
+  const filteredReviews = reviews.filter(r => activeTab === 'all' || r.status === tabFilterMap(activeTab));
+
+  // Helper to map tab state to schema status (both use identical values, keeping it safe)
+  function tabFilterMap(tab: typeof activeTab): 'pending' | 'approved' | 'rejected' | undefined {
+    if (tab === 'all') return undefined;
+    return tab;
+  }
+
   const [formData, setFormData] = useState({
     name: '',
     role: '',
