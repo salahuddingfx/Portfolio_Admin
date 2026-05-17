@@ -15,6 +15,7 @@ interface Review {
   avatar: string;
   rating: number;
   order: number;
+  status: 'pending' | 'approved' | 'rejected';
 }
 
 export default function ReviewsPage() {
@@ -30,6 +31,8 @@ export default function ReviewsPage() {
   const [inviteExpires, setInviteExpires] = useState(7);
   const [inviteMessage, setInviteMessage] = useState('');
 
+  const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+
   const [formData, setFormData] = useState({
     name: '',
     role: '',
@@ -37,12 +40,13 @@ export default function ReviewsPage() {
     text: '',
     avatar: '',
     rating: 5,
-    order: 0
+    order: 0,
+    status: 'approved'
   });
 
   const fetchReviews = async () => {
     try {
-      const res = await api.get('/admin/reviews');
+      const res = await api.get('/admin/reviews/admin');
       setReviews(res.data);
     } catch (err) {
       console.error('Failed to fetch reviews:', err);
@@ -55,6 +59,15 @@ export default function ReviewsPage() {
     fetchReviews();
   }, []);
 
+  const handleUpdateStatus = async (id: string, newStatus: 'approved' | 'rejected') => {
+    try {
+      await api.put(`/admin/reviews/${id}`, { status: newStatus });
+      fetchReviews();
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    }
+  };
+
   const handleOpenModal = (review?: Review) => {
     if (review) {
       setEditingReview(review);
@@ -65,7 +78,8 @@ export default function ReviewsPage() {
         text: review.text,
         avatar: review.avatar || '',
         rating: review.rating,
-        order: review.order
+        order: review.order,
+        status: review.status || 'approved'
       });
     } else {
       setEditingReview(null);
@@ -76,7 +90,8 @@ export default function ReviewsPage() {
         text: '',
         avatar: '',
         rating: 5,
-        order: reviews.length
+        order: reviews.length,
+        status: 'approved'
       });
     }
     setModalOpen(true);
@@ -224,6 +239,37 @@ export default function ReviewsPage() {
           {inviteMessage && <p className="text-xs text-[var(--muted)]">{inviteMessage}</p>}
         </div>
 
+        {/* Status Filter Tabs */}
+        <div className="flex flex-wrap gap-2 border-b border-[var(--border)] pb-6">
+          {(['all', 'pending', 'approved', 'rejected'] as const).map((tab) => {
+            const count = tab === 'all' 
+              ? reviews.length 
+              : reviews.filter(r => r.status === tab).length;
+            const isActive = activeTab === tab;
+            
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-6 py-3 rounded-xl text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border ${
+                  isActive 
+                    ? 'bg-white text-black border-white font-bold' 
+                    : 'bg-white/5 text-[var(--muted)] border-[var(--border)] hover:border-[var(--accent)]/50 hover:text-white'
+                }`}
+              >
+                {tab}
+                <span className={`px-2 py-0.5 rounded-full text-[10px] ${
+                  isActive 
+                    ? 'bg-black text-white' 
+                    : 'bg-white/10 text-[var(--muted)]'
+                }`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 space-y-4">
             <Loader2 size={40} className="animate-spin text-[var(--accent)]" />
@@ -231,8 +277,26 @@ export default function ReviewsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {reviews.map((review) => (
+            {filteredReviews.length === 0 ? (
+              <div className="col-span-full text-center py-20 bg-[var(--surface)] border border-[var(--border)] rounded-[2.5rem]">
+                <p className="text-[var(--muted)] font-mono text-sm uppercase tracking-widest">No reviews found in this category.</p>
+              </div>
+            ) : (
+              filteredReviews.map((review) => (
               <div key={review._id} className="group bg-[var(--surface)] border border-[var(--border)] rounded-[2.5rem] p-8 space-y-8 hover:border-[var(--accent)]/50 transition-all duration-500 shadow-2xl relative">
+                {/* Status Badge */}
+                <div className="absolute top-6 right-6">
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider border ${
+                    review.status === 'approved' 
+                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' 
+                      : review.status === 'rejected'
+                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/25'
+                      : 'bg-amber-500/10 text-amber-400 border-amber-500/25 animate-pulse'
+                  }`}>
+                    {review.status || 'approved'}
+                  </span>
+                </div>
+
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[var(--border)]">
                     <img src={review.avatar || 'https://i.pravatar.cc/150?u=placeholder'} alt={review.name} className="w-full h-full object-cover" />
@@ -254,13 +318,33 @@ export default function ReviewsPage() {
                   </blockquote>
                 </div>
 
-                <div className="pt-6 border-t border-[var(--border)] flex justify-end gap-2">
-                  <button onClick={() => handleOpenModal(review)} className="p-3 bg-white/5 rounded-xl hover:bg-blue-500/20 hover:text-blue-400 transition-all">
-                    <Pencil size={18} />
-                  </button>
-                  <button onClick={() => handleDelete(review._id)} className="p-3 bg-white/5 rounded-xl hover:bg-red-500/20 hover:text-red-400 transition-all">
-                    <Trash2 size={18} />
-                  </button>
+                <div className="pt-6 border-t border-[var(--border)] flex items-center justify-between gap-2">
+                  <div className="flex gap-2">
+                    {review.status !== 'approved' && (
+                      <button 
+                        onClick={() => handleUpdateStatus(review._id, 'approved')} 
+                        className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-mono uppercase tracking-wider rounded-xl hover:bg-emerald-500 hover:text-black transition-all border border-emerald-500/20"
+                      >
+                        Approve
+                      </button>
+                    )}
+                    {review.status !== 'rejected' && (
+                      <button 
+                        onClick={() => handleUpdateStatus(review._id, 'rejected')} 
+                        className="px-3 py-1.5 bg-rose-500/10 text-rose-400 text-[10px] font-mono uppercase tracking-wider rounded-xl hover:bg-rose-500 hover:text-black transition-all border border-rose-500/20"
+                      >
+                        Reject
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleOpenModal(review)} className="p-3 bg-white/5 rounded-xl hover:bg-blue-500/20 hover:text-blue-400 transition-all">
+                      <Pencil size={18} />
+                    </button>
+                    <button onClick={() => handleDelete(review._id)} className="p-3 bg-white/5 rounded-xl hover:bg-red-500/20 hover:text-red-400 transition-all">
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -306,6 +390,30 @@ export default function ReviewsPage() {
                           }`}
                         >
                           {num}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Status</label>
+                    <div className="flex gap-4">
+                      {(['pending', 'approved', 'rejected'] as const).map((statusVal) => (
+                        <button
+                          key={statusVal}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, status: statusVal })}
+                          className={`flex-1 py-4 rounded-xl border text-xs font-mono uppercase tracking-wider transition-all ${
+                            formData.status === statusVal 
+                              ? statusVal === 'approved'
+                                ? 'bg-emerald-500 border-emerald-500 text-black'
+                                : statusVal === 'rejected'
+                                ? 'bg-rose-500 border-rose-500 text-black'
+                                : 'bg-amber-500 border-amber-500 text-black'
+                              : 'bg-white/5 border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)]/50'
+                          }`}
+                        >
+                          {statusVal}
                         </button>
                       ))}
                     </div>
