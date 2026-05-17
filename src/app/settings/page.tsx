@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardShell from '@/components/DashboardShell';
 import api from '@/lib/api';
-import { Save, Loader2, User, Phone, Mail, MapPin, MessageCircle, FileText, Upload } from 'lucide-react';
+import { Save, Loader2, User, Phone, Mail, MapPin, MessageCircle, FileText, Upload, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -63,6 +63,12 @@ export default function SettingsPage() {
       facebook: '',
     }
   });
+  const [adminProfile, setAdminProfile] = useState({ username: '', email: '' });
+  const [adminCurrentPassword, setAdminCurrentPassword] = useState('');
+  const [adminNewPassword, setAdminNewPassword] = useState('');
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState('');
+  const [adminSubmitting, setAdminSubmitting] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   const fetchSettings = async () => {
     try {
@@ -94,8 +100,21 @@ export default function SettingsPage() {
     }
   };
 
+  const fetchAdminProfile = async () => {
+    try {
+      const res = await api.get('/admin/me');
+      setAdminProfile({
+        username: res.data?.username || '',
+        email: res.data?.email || ''
+      });
+    } catch (err) {
+      console.error('Failed to fetch admin profile:', err);
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
+    fetchAdminProfile();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,6 +128,45 @@ export default function SettingsPage() {
       toast.error('Failed to save settings.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleAdminUpdate = async () => {
+    if (adminNewPassword && adminNewPassword !== adminConfirmPassword) {
+      toast.error('New passwords do not match.');
+      return;
+    }
+    if (adminNewPassword && !adminCurrentPassword) {
+      toast.error('Current password is required to set a new one.');
+      return;
+    }
+
+    setAdminSubmitting(true);
+    try {
+      const payload: {
+        username: string;
+        email: string;
+        currentPassword?: string;
+        newPassword?: string;
+      } = {
+        username: adminProfile.username,
+        email: adminProfile.email,
+      };
+
+      if (adminNewPassword) {
+        payload.currentPassword = adminCurrentPassword;
+        payload.newPassword = adminNewPassword;
+      }
+
+      await api.put('/admin/me', payload);
+      toast.success('Admin access updated.');
+      setAdminCurrentPassword('');
+      setAdminNewPassword('');
+      setAdminConfirmPassword('');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update admin access.');
+    } finally {
+      setAdminSubmitting(false);
     }
   };
 
@@ -335,6 +393,87 @@ export default function SettingsPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-8 p-10 bg-[var(--surface)] border border-[var(--border)] rounded-[2.5rem]">
+          <div className="flex items-center gap-4 border-b border-[var(--border)] pb-6">
+            <div className="p-3 bg-[var(--accent)]/10 text-[var(--accent)] rounded-xl">
+              <KeyRound size={24} />
+            </div>
+            <h2 className="text-xl font-bold uppercase tracking-tight">Admin Access</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Username</label>
+              <input
+                type="text"
+                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 text-xs focus:border-[var(--accent)] outline-none transition-all"
+                value={adminProfile.username}
+                onChange={(e) => setAdminProfile({ ...adminProfile, username: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Email</label>
+              <input
+                type="email"
+                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 text-xs focus:border-[var(--accent)] outline-none transition-all"
+                value={adminProfile.email}
+                onChange={(e) => setAdminProfile({ ...adminProfile, email: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Current Password</label>
+              <input
+                type={showAdminPassword ? 'text' : 'password'}
+                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 text-xs focus:border-[var(--accent)] outline-none transition-all"
+                value={adminCurrentPassword}
+                onChange={(e) => setAdminCurrentPassword(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] ml-1">New Password</label>
+              <input
+                type={showAdminPassword ? 'text' : 'password'}
+                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 text-xs focus:border-[var(--accent)] outline-none transition-all"
+                value={adminNewPassword}
+                onChange={(e) => setAdminNewPassword(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+            <div className="space-y-2">
+              <label className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Confirm New Password</label>
+              <input
+                type={showAdminPassword ? 'text' : 'password'}
+                className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-4 text-xs focus:border-[var(--accent)] outline-none transition-all"
+                value={adminConfirmPassword}
+                onChange={(e) => setAdminConfirmPassword(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setShowAdminPassword((prev) => !prev)}
+                className="px-5 py-3 border border-[var(--border)] rounded-2xl text-xs font-mono uppercase tracking-widest text-[var(--muted)] hover:text-white hover:border-[var(--accent)]/60 transition"
+                aria-label={showAdminPassword ? 'Hide password' : 'Show password'}
+              >
+                {showAdminPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+              <button
+                type="button"
+                onClick={handleAdminUpdate}
+                disabled={adminSubmitting}
+                className="px-8 py-3 bg-white text-black font-black uppercase tracking-tighter rounded-2xl hover:bg-[var(--accent)] transition-all disabled:opacity-60"
+              >
+                {adminSubmitting ? 'Saving...' : 'Update Admin'}
+              </button>
             </div>
           </div>
         </div>

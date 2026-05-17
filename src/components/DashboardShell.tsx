@@ -40,7 +40,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   return (
     <div className="flex min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       {/* Sidebar */}
-      <aside className="w-80 border-r border-[var(--border)] flex flex-col p-10 space-y-12 bg-[var(--surface)] sticky top-0 h-screen">
+      <aside className="w-80 border-r border-[var(--border)] flex flex-col p-10 space-y-12 bg-[var(--surface)] sticky top-0 h-screen overflow-y-auto overscroll-contain">
         <div className="flex items-center gap-5">
           <div className="w-12 h-12 bg-[var(--accent)] rounded-xl flex items-center justify-center shadow-[0_0_25px_rgba(147,51,234,0.3)]">
             <span className="font-bold text-black text-2xl tracking-tighter italic">S</span>
@@ -51,7 +51,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           </div>
         </div>
 
-        <nav className="flex-grow space-y-4">
+        <nav className="flex-1 space-y-4 overflow-y-auto pr-2 min-h-0">
           {navItems.map((item) => (
             <Link
               key={item.name}
