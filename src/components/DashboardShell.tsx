@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutDashboard, Briefcase, MessageSquare, FileText, Wrench, Clock, Award, LogOut, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
+import { LayoutDashboard, Briefcase, MessageSquare, FileText, Wrench, Clock, Award, Building2, LogOut, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -28,6 +28,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     { name: 'Services', href: '/services', icon: Wrench },
     { name: 'Timeline', href: '/timeline', icon: Clock },
     { name: 'Certificates', href: '/certificates', icon: Award },
+    { name: 'Partners', href: '/partners', icon: Building2 },
     { name: 'Reviews', href: '/reviews', icon: MessageSquare },
     { name: 'Settings', href: '/settings', icon: SettingsIcon },
   ];
