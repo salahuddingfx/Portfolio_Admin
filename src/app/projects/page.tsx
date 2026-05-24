@@ -282,7 +282,7 @@ export default function ProjectsPage() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Vortex OS"
+                      placeholder="e.g. StudyFlow"
                       className="w-full bg-[var(--background)] border border-[var(--border)] rounded-2xl p-5 text-sm focus:border-[var(--accent)] outline-none transition-all"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
