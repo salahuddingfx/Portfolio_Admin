@@ -138,7 +138,8 @@ export default function Dashboard() {
             </div>
             
             <div className="overflow-x-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse">
+              {/* Desktop Table */}
+              <table className="w-full text-left border-collapse hidden md:table">
                 <thead>
                   <tr className="border-b border-[var(--border)] bg-white/2">
                     <th className="p-6 text-[10px] font-mono uppercase tracking-widest text-[var(--muted)]">IP Address</th>
@@ -179,6 +180,30 @@ export default function Dashboard() {
                   ))}
                 </tbody>
               </table>
+
+              {/* Mobile Cards */}
+              <div className="md:hidden space-y-4 p-6">
+                {visitors.map((v) => (
+                  <div key={v._id} className="p-5 bg-white/3 border border-[var(--border)] rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-mono text-[var(--accent)]">{v.ip.replace('::ffff:', '')}</span>
+                      <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] font-mono">
+                        <Clock size={10} />
+                        {new Date(v.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin size={12} className="text-[var(--muted)]" />
+                      <span className="text-sm font-bold">{v.country}</span>
+                      <span className="text-[10px] text-[var(--muted)]">{v.city}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs bg-white/5 px-3 py-1 rounded-full border border-white/10">{v.path}</span>
+                      <p className="text-[10px] text-[var(--muted)] truncate max-w-[100px]">{v.referrer}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
