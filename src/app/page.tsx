@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import DashboardShell from '@/components/DashboardShell';
 import api from '@/lib/api';
 import { Users, Eye, Globe, Navigation, Clock, Search, MapPin, Monitor, ExternalLink, Loader2 } from 'lucide-react';
+import WorldMap from '@/components/WorldMap';
 
 interface Analytics {
   totalVisits: number;
