@@ -99,6 +99,30 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* World Map */}
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[3rem] overflow-hidden">
+          <div className="p-10 border-b border-[var(--border)] flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-black uppercase tracking-tight">Visitor Map</h2>
+              <p className="text-xs font-mono uppercase tracking-widest text-[var(--muted)] mt-1">Geographical Distribution</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Globe size={16} className="text-[var(--accent)]" />
+              <span className="text-xs font-mono text-[var(--muted)]">{analytics?.topCountries.length || 0} Countries</span>
+            </div>
+          </div>
+          <div className="p-6 md:p-10">
+            {analytics?.topCountries && analytics.topCountries.length > 0 ? (
+              <WorldMap countries={analytics.topCountries} />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 space-y-3">
+                <Globe size={40} className="text-[var(--muted)] opacity-50" />
+                <p className="text-sm text-[var(--muted)]">No visitor data yet</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Visitors */}
           <div className="lg:col-span-2 bg-[var(--surface)] border border-[var(--border)] rounded-[3rem] overflow-hidden flex flex-col">
@@ -164,7 +188,7 @@ export default function Dashboard() {
             <div className="bg-[var(--surface)] border border-[var(--border)] rounded-[3rem] p-10 space-y-8">
               <div>
                 <h2 className="text-xl font-black uppercase tracking-tight">Top Origins</h2>
-                <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] mt-1">Geographical Spread</p>
+                <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--muted)] mt-1">Ranked by Visits</p>
               </div>
               <div className="space-y-6">
                 {analytics?.topCountries.map((country, i) => (
