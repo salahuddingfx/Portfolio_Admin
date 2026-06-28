@@ -18,6 +18,7 @@ interface Project {
   title: string;
   desc: string;
   image: string;
+  mobileImage?: string;
   category: string;
   tags: string[];
   links: {
@@ -39,6 +40,7 @@ export default function ProjectsPage() {
     title: '',
     desc: '',
     image: '',
+    mobileImage: '',
     category: '',
     tags: '',
     liveLink: '',
@@ -69,6 +71,7 @@ export default function ProjectsPage() {
         title: project.title,
         desc: project.desc,
         image: project.image,
+        mobileImage: project.mobileImage || '',
         category: project.category || '',
         tags: project.tags.join(', '),
         liveLink: project.links.live,
@@ -82,6 +85,7 @@ export default function ProjectsPage() {
         title: '',
         desc: '',
         image: '',
+        mobileImage: '',
         category: '',
         tags: '',
         liveLink: '',
@@ -101,6 +105,7 @@ export default function ProjectsPage() {
       title: formData.title,
       desc: formData.desc,
       image: formData.image,
+      mobileImage: formData.mobileImage,
       category: formData.category,
       tags: formData.tags.split(',').map(t => t.trim()).filter(t => t),
       links: {
@@ -162,9 +167,14 @@ export default function ProjectsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {projects.map((project) => (
               <div key={project._id} className="group bg-[var(--surface)] border border-[var(--border)] rounded-[2rem] overflow-hidden hover:border-[var(--accent)]/50 transition-all duration-500 shadow-2xl">
-                <div className="aspect-video relative overflow-hidden">
+                <div className="aspect-video relative overflow-hidden bg-neutral-900">
                   <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
+                  {project.mobileImage && (
+                    <div className="absolute bottom-4 right-4 w-12 h-20 border-2 border-black rounded-lg overflow-hidden shadow-lg z-10">
+                      <img src={project.mobileImage} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8 z-20">
                     <div className="flex gap-4">
                       <a href={project.links.live} target="_blank" className="p-3 bg-white/10 backdrop-blur-md rounded-xl hover:bg-[var(--accent)] hover:text-black transition-all">
                         <ExternalLink size={18} />
@@ -229,8 +239,13 @@ export default function ProjectsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-8">
                   <div className="space-y-2">
-                    <label className="text-xs font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Thumbnail Image</label>
+                    <label className="text-xs font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Desktop Thumbnail Image</label>
                     <ImageUpload onUpload={(url) => setFormData({ ...formData, image: url })} defaultValue={formData.image} />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-xs font-mono uppercase tracking-widest text-[var(--muted)] ml-1">Mobile Thumbnail Image</label>
+                    <ImageUpload onUpload={(url) => setFormData({ ...formData, mobileImage: url })} defaultValue={formData.mobileImage} />
                   </div>
                   
                   <div className="space-y-2">
